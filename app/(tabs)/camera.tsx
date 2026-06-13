@@ -21,6 +21,15 @@ export default function CameraScreen() {
     requestPermission();
   }, []);
 
+  useEffect(() => {
+    if (hasPermission === false) {
+      Alert.alert(
+        'Нет доступа',
+        'Разрешите доступ к камере в настройках устройства'
+      );
+    }
+  }, [hasPermission]);
+
   const handleCapture = async () => {
     const uri = await takePhoto();
     if (uri) {
@@ -38,15 +47,6 @@ export default function CameraScreen() {
   if (hasPermission === null) {
     return <View style={styles.container} />;
   }
-
-  useEffect(() => {
-    if (hasPermission === false) {
-      Alert.alert(
-        'Нет доступа',
-        'Разрешите доступ к камере в настройках устройства'
-      );
-    }
-  }, [hasPermission]);
 
   return (
     <View style={styles.container}>
