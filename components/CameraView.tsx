@@ -27,15 +27,7 @@ export function CameraView({
         type={Camera.Constants.Type.back}
       >
         <View style={styles.overlay}>
-          <View style={styles.topBar}>
-            <TouchableOpacity onPress={onToggleFlash} style={styles.iconButton}>
-              <Ionicons
-                name={flashMode === 'on' ? 'flash' : 'flash-outline'}
-                size={24}
-                color={COLORS.textPrimary}
-              />
-            </TouchableOpacity>
-          </View>
+          <View style={styles.topBar} />
 
           <View style={styles.bottomBar}>
             <TouchableOpacity onPress={onPickGallery} style={styles.iconButton}>
@@ -46,7 +38,13 @@ export function CameraView({
               <View style={styles.captureInner} />
             </TouchableOpacity>
 
-            <View style={{ width: 48 }} />
+            <TouchableOpacity onPress={onToggleFlash} style={styles.iconButton}>
+              <Ionicons
+                name={flashMode === 'on' ? 'flash' : 'flash-outline'}
+                size={24}
+                color={COLORS.textPrimary}
+              />
+            </TouchableOpacity>
           </View>
         </View>
       </Camera>
