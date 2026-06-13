@@ -1,9 +1,10 @@
 {
   "name": "virtual-tryon",
   "version": "1.0.0",
-  "main": "index.ts",
+  "main": "expo-router/entry",
   "dependencies": {
     "@expo/vector-icons": "^15.0.2",
+    "@react-native-async-storage/async-storage": "^3.1.1",
     "@react-navigation/bottom-tabs": "^7.18.0",
     "@react-navigation/native": "^7.3.1",
     "expo": "~56.0.11",
