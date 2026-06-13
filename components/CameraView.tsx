@@ -3,12 +3,15 @@ import { Camera } from 'expo-camera';
 import { Ionicons } from '@expo/vector-icons';
 import { COLORS, SPACING } from '../utils/constants';
 
+import { Text } from 'react-native';
+
 interface CameraViewProps {
   cameraRef: React.RefObject<Camera>;
   flashMode: 'on' | 'off';
   onCapture: () => void;
   onPickGallery: () => void;
   onToggleFlash: () => void;
+  onBack: () => void;
 }
 
 export function CameraView({
@@ -17,6 +20,7 @@ export function CameraView({
   onCapture,
   onPickGallery,
   onToggleFlash,
+  onBack,
 }: CameraViewProps) {
   return (
     <View style={styles.container}>
@@ -27,7 +31,12 @@ export function CameraView({
         type={Camera.Constants.Type.back}
       >
         <View style={styles.overlay}>
-          <View style={styles.topBar} />
+          <View style={styles.topBar}>
+            <TouchableOpacity onPress={onBack} style={styles.backButton}>
+              <Ionicons name="arrow-back" size={24} color={COLORS.textPrimary} />
+            </TouchableOpacity>
+            <Text style={styles.title}>примерка</Text>
+          </View>
 
           <View style={styles.bottomBar}>
             <TouchableOpacity onPress={onPickGallery} style={styles.iconButton}>
@@ -65,9 +74,23 @@ const styles = StyleSheet.create({
   },
   topBar: {
     flexDirection: 'row',
-    justifyContent: 'flex-end',
+    justifyContent: 'space-between',
+    alignItems: 'center',
     padding: SPACING.lg,
     paddingTop: SPACING.xl,
+  },
+  backButton: {
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    backgroundColor: 'rgba(0,0,0,0.4)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  title: {
+    color: COLORS.textPrimary,
+    fontSize: 18,
+    fontWeight: '600',
   },
   bottomBar: {
     flexDirection: 'row',
