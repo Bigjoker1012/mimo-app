@@ -1,0 +1,38 @@
+{
+  "expo": {
+    "name": "Virtual Try-On",
+    "slug": "virtual-tryon",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "dark",
+    "splash": {
+      "backgroundColor": "#121212"
+    },
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.virtualtryon.app"
+    },
+    "android": {
+      "adaptiveIcon": {
+        "backgroundColor": "#121212"
+      },
+      "package": "com.virtualtryon.app"
+    },
+    "plugins": [
+      "expo-router",
+      [
+        "expo-camera",
+        {
+          "cameraPermission": "Allow Virtual Try-On to access your camera for virtual try-on."
+        }
+      ],
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "Allow Virtual Try-On to access your photos for virtual try-on."
+        }
+      ]
+    ]
+  }
+}
