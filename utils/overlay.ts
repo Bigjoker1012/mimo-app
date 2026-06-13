@@ -1,12 +1,4 @@
-import { BodyDetection, OverlayConfig } from '../types';
-
-export interface OverlayPosition {
-  x: number;
-  y: number;
-  width: number;
-  height: number;
-  rotation: number;
-}
+import { BodyDetection, OverlayConfig, OverlayPosition } from '../types';
 
 export function calculateOverlayPosition(
   body: BodyDetection,

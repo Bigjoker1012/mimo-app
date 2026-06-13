@@ -40,3 +40,11 @@ export interface BodyDetection {
   shoulderWidth: number;
   confidence: number;
 }
+
+export interface OverlayPosition {
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+  rotation: number;
+}
