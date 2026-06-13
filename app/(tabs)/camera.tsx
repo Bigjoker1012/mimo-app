@@ -39,12 +39,14 @@ export default function CameraScreen() {
     return <View style={styles.container} />;
   }
 
-  if (hasPermission === false) {
-    Alert.alert(
-      'Нет доступа',
-      'Разрешите доступ к камере в настройках устройства'
-    );
-  }
+  useEffect(() => {
+    if (hasPermission === false) {
+      Alert.alert(
+        'Нет доступа',
+        'Разрешите доступ к камере в настройках устройства'
+      );
+    }
+  }, [hasPermission]);
 
   return (
     <View style={styles.container}>

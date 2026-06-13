@@ -1,9 +1,7 @@
-import { View, TouchableOpacity, StyleSheet } from 'react-native';
+import { View, TouchableOpacity, StyleSheet, Text } from 'react-native';
 import { Camera } from 'expo-camera';
 import { Ionicons } from '@expo/vector-icons';
 import { COLORS, SPACING } from '../utils/constants';
-
-import { Text } from 'react-native';
 
 interface CameraViewProps {
   cameraRef: React.RefObject<Camera>;
