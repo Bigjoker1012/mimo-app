@@ -9,7 +9,9 @@ export default function RootLayout() {
   const [ready, setReady] = useState(false);
 
   useEffect(() => {
-    initAuth().then(() => setReady(true));
+    initAuth()
+      .then(() => setReady(true))
+      .catch(() => setReady(true));
   }, []);
 
   if (!ready) {
