@@ -4,7 +4,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { COLORS, SPACING } from '../utils/constants';
 
 interface CameraViewProps {
-  cameraRef: React.RefObject<CameraViewRef>;
+  cameraRef: any;
   flashMode: 'on' | 'off';
   onCapture: () => void;
   onPickGallery: () => void;
