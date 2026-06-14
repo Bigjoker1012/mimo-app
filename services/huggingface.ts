@@ -9,17 +9,30 @@ interface TryOnResult {
   error?: string;
 }
 
-async function queryModel(
+async function imageToBlob(uri: string): Promise<Blob> {
+  const response = await fetch(uri);
+  return response.blob();
+}
+
+async function queryModelWithImages(
   model: string,
-  inputs: Record<string, any>
+  personImageUri: string,
+  garmentImageUri: string
 ): Promise<Blob> {
+  const formData = new FormData();
+
+  const personBlob = await imageToBlob(personImageUri);
+  const garmentBlob = await imageToBlob(garmentImageUri);
+
+  formData.append('person_image', personBlob, 'person.jpg');
+  formData.append('garment_image', garmentBlob, 'garment.jpg');
+
   const response = await fetch(`${HF_API_URL}/${model}`, {
     method: 'POST',
     headers: {
       'Authorization': `Bearer ${API_TOKEN}`,
-      'Content-Type': 'application/json',
     },
-    body: JSON.stringify(inputs),
+    body: formData,
   });
 
   if (!response.ok) {
@@ -31,41 +44,14 @@ async function queryModel(
 }
 
 export async function tryOnWithHuggingFace(
-  personImageUrl: string,
-  garmentImageUrl: string
+  personImageUri: string,
+  garmentImageUri: string
 ): Promise<TryOnResult> {
   try {
-    const resultBlob = await queryModel(VITON_MODEL, {
-      inputs: {
-        person_image: personImageUrl,
-        garment_image: garmentImageUrl,
-      },
-    });
-
+    const resultBlob = await queryModelWithImages(VITON_MODEL, personImageUri, garmentImageUri);
     const imageUrl = URL.createObjectURL(resultBlob);
     return { success: true, imageUrl };
   } catch (error: any) {
     return { success: false, error: error.message };
   }
-}
-
-export async function tryOnWithMultipleModels(
-  personImageUrl: string,
-  garmentImageUrl: string
-): Promise<TryOnResult> {
-  const models = [
-    'yisol/IDM-VTON',
-    'magic-research/magictryon-v1',
-  ];
-
-  for (const model of models) {
-    try {
-      const result = await tryOnWithHuggingFace(personImageUrl, garmentImageUrl);
-      if (result.success) return result;
-    } catch {
-      continue;
-    }
-  }
-
-  return { success: false, error: 'All models failed' };
 }
