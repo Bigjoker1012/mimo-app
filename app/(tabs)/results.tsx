@@ -3,7 +3,7 @@ import { View, Text, Image, TouchableOpacity, StyleSheet, Alert, Share, Activity
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { COLORS, SPACING } from '../../utils/constants';
-import { createTryOnPrediction, waitForResult } from '../../services/replicate';
+import { tryOnWithOpenAI, imageToBase64 } from '../../services/openai';
 
 export default function ResultsScreen() {
   const { bodyPhoto, clothingPhoto } = useLocalSearchParams<{
@@ -27,9 +27,16 @@ export default function ResultsScreen() {
     setError(null);
 
     try {
-      const predictionId = await createTryOnPrediction(bodyPhoto, clothingPhoto);
-      const resultUrl = await waitForResult(predictionId);
-      setResultImage(resultUrl);
+      const personBase64 = await imageToBase64(bodyPhoto);
+      const garmentBase64 = await imageToBase64(clothingPhoto);
+
+      const result = await tryOnWithOpenAI(personBase64, garmentBase64);
+
+      if (result.success && result.imageUrl) {
+        setResultImage(result.imageUrl);
+      } else {
+        setError(result.error || 'Ошибка примерки');
+      }
     } catch (err: any) {
       setError(err.message || 'Ошибка примерки');
     } finally {
@@ -66,8 +73,8 @@ export default function ResultsScreen() {
       {loading ? (
         <View style={styles.loadingContainer}>
           <ActivityIndicator size="large" color={COLORS.accent} />
-          <Text style={styles.loadingText}>Нейросеть обрабатывает фото...</Text>
-          <Text style={styles.loadingHint}>Это может занять 30-60 секунд</Text>
+          <Text style={styles.loadingText}>OpenAI обрабатывает фото...</Text>
+          <Text style={styles.loadingHint}>GPT-4o анализирует → DALL-E генерирует</Text>
         </View>
       ) : error ? (
         <View style={styles.errorContainer}>
