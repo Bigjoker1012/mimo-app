@@ -1,30 +1,27 @@
 import { useState, useRef } from 'react';
-import { CameraView, type CameraViewRef } from 'expo-camera';
+import { CameraView, type CameraViewRef, useCameraPermissions } from 'expo-camera';
 import * as ImagePicker from 'expo-image-picker';
 import { Alert } from 'react-native';
 
 export function useCamera() {
-  const [hasPermission, setHasPermission] = useState<boolean | null>(null);
+  const [permission, requestPermission] = useCameraPermissions();
   const [photo, setPhoto] = useState<string | null>(null);
   const [flashMode, setFlashMode] = useState<'on' | 'off'>('off');
   const cameraRef = useRef<CameraViewRef>(null);
 
-  const requestPermission = async () => {
-    const { status } = await CameraView.requestCameraPermissionsAsync();
-    setHasPermission(status === 'granted');
+  const hasPermission = permission?.granted ?? null;
 
-    if (status !== 'granted') {
+  const ensurePermission = async (): Promise<boolean> => {
+    if (permission?.granted) return true;
+
+    const result = await requestPermission();
+    if (!result.granted) {
       Alert.alert(
         'Доступ к камере',
-        'Для работы приложения нужен доступ к камере. Перейдите в настройки.',
-        [
-          { text: 'Отмена', style: 'cancel' },
-          { text: 'Настройки', onPress: () => CameraView.requestCameraPermissionsAsync() },
-        ]
+        'Для работы приложения нужен доступ к камере.',
       );
     }
-
-    return status === 'granted';
+    return result.granted;
   };
 
   const takePhoto = async (): Promise<string | null> => {
@@ -73,7 +70,7 @@ export function useCamera() {
     photo,
     flashMode,
     cameraRef,
-    requestPermission,
+    requestPermission: ensurePermission,
     takePhoto,
     pickFromGallery,
     toggleFlash,
