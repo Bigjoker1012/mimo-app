@@ -1,8 +1,9 @@
-import { useState } from 'react';
-import { View, Text, Image, TouchableOpacity, StyleSheet, Alert, Share } from 'react-native';
+import { useState, useEffect } from 'react';
+import { View, Text, Image, TouchableOpacity, StyleSheet, Alert, Share, ActivityIndicator } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { COLORS, SPACING } from '../../utils/constants';
+import { createTryOnPrediction, waitForResult } from '../../services/replicate';
 
 export default function ResultsScreen() {
   const { bodyPhoto, clothingPhoto } = useLocalSearchParams<{
@@ -10,17 +11,41 @@ export default function ResultsScreen() {
     clothingPhoto: string;
   }>();
   const router = useRouter();
-  const [saved, setSaved] = useState(false);
+
+  const [resultImage, setResultImage] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (bodyPhoto && clothingPhoto) {
+      startTryOn();
+    }
+  }, []);
+
+  const startTryOn = async () => {
+    setLoading(true);
+    setError(null);
+
+    try {
+      const predictionId = await createTryOnPrediction(bodyPhoto, clothingPhoto);
+      const resultUrl = await waitForResult(predictionId);
+      setResultImage(resultUrl);
+    } catch (err: any) {
+      setError(err.message || 'Ошибка примерки');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleSave = () => {
-    setSaved(true);
-    Alert.alert('Сохранено', 'Результат сохранён в историю');
+    Alert.alert('Сохранено', 'Результат сохранён');
   };
 
   const handleShare = async () => {
     try {
       await Share.share({
         message: 'Посмотри как я примеряю одежду!',
+        url: resultImage || bodyPhoto,
       });
     } catch (err) {
       Alert.alert('Ошибка', 'Не удалось поделиться');
@@ -38,21 +63,36 @@ export default function ResultsScreen() {
     <View style={styles.container}>
       <Text style={styles.title}>Результат примерки</Text>
 
-      <View style={styles.photosContainer}>
-        <View style={styles.photoBox}>
-          <Text style={styles.label}>Модель</Text>
-          <Image source={{ uri: bodyPhoto }} style={styles.photo} resizeMode="contain" />
+      {loading ? (
+        <View style={styles.loadingContainer}>
+          <ActivityIndicator size="large" color={COLORS.accent} />
+          <Text style={styles.loadingText}>Нейросеть обрабатывает фото...</Text>
+          <Text style={styles.loadingHint}>Это может занять 30-60 секунд</Text>
         </View>
-        <View style={styles.photoBox}>
-          <Text style={styles.label}>Одежда</Text>
-          <Image source={{ uri: clothingPhoto }} style={styles.photo} resizeMode="contain" />
+      ) : error ? (
+        <View style={styles.errorContainer}>
+          <Ionicons name="alert-circle" size={48} color={COLORS.error} />
+          <Text style={styles.errorText}>{error}</Text>
+          <TouchableOpacity style={styles.retryBtn} onPress={startTryOn}>
+            <Text style={styles.retryText}>Попробовать снова</Text>
+          </TouchableOpacity>
         </View>
-      </View>
-
-      <Text style={styles.hint}>
-        Для полноценной примерки необходим Google Cloud Vision API.{'\n'}
-        Сейчас показаны исходные фото.
-      </Text>
+      ) : resultImage ? (
+        <View style={styles.resultContainer}>
+          <Image source={{ uri: resultImage }} style={styles.resultImage} resizeMode="contain" />
+        </View>
+      ) : (
+        <View style={styles.previewContainer}>
+          <View style={styles.photoBox}>
+            <Text style={styles.label}>Модель</Text>
+            <Image source={{ uri: bodyPhoto }} style={styles.photo} resizeMode="contain" />
+          </View>
+          <View style={styles.photoBox}>
+            <Text style={styles.label}>Одежда</Text>
+            <Image source={{ uri: clothingPhoto }} style={styles.photo} resizeMode="contain" />
+          </View>
+        </View>
+      )}
 
       <View style={styles.bottomBar}>
         <TouchableOpacity style={styles.btn} onPress={() => router.back()}>
@@ -73,12 +113,9 @@ export default function ResultsScreen() {
         <TouchableOpacity
           style={[styles.btn, styles.saveBtn]}
           onPress={handleSave}
-          disabled={saved}
         >
           <Ionicons name="bookmark" size={20} color={COLORS.background} />
-          <Text style={[styles.btnText, { color: COLORS.background }]}>
-            {saved ? 'Сохранено' : 'Сохранить'}
-          </Text>
+          <Text style={[styles.btnText, { color: COLORS.background }]}>Сохранить</Text>
         </TouchableOpacity>
       </View>
     </View>
@@ -98,10 +135,55 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     marginBottom: SPACING.lg,
   },
-  photosContainer: {
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    gap: SPACING.md,
+  },
+  loadingText: {
+    color: COLORS.textPrimary,
+    fontSize: 16,
+  },
+  loadingHint: {
+    color: COLORS.textSecondary,
+    fontSize: 14,
+  },
+  errorContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    gap: SPACING.md,
+  },
+  errorText: {
+    color: COLORS.error,
+    fontSize: 14,
+    textAlign: 'center',
+  },
+  retryBtn: {
+    paddingVertical: SPACING.sm,
+    paddingHorizontal: SPACING.lg,
+    borderWidth: 1,
+    borderColor: COLORS.accent,
+    borderRadius: 8,
+  },
+  retryText: {
+    color: COLORS.accent,
+  },
+  resultContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  resultImage: {
+    width: '100%',
+    height: 400,
+    borderRadius: 12,
+  },
+  previewContainer: {
     flexDirection: 'row',
     gap: SPACING.sm,
-    marginBottom: SPACING.md,
+    flex: 1,
   },
   photoBox: {
     flex: 1,
@@ -118,13 +200,7 @@ const styles = StyleSheet.create({
   },
   photo: {
     width: '100%',
-    height: 200,
-  },
-  hint: {
-    color: COLORS.textSecondary,
-    fontSize: 12,
-    textAlign: 'center',
-    marginBottom: SPACING.lg,
+    height: 250,
   },
   bottomBar: {
     flexDirection: 'row',
