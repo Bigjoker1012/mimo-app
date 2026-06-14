@@ -3,7 +3,7 @@ import { View, Text, Image, TouchableOpacity, StyleSheet, Alert, Share, Activity
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { COLORS, SPACING } from '../../utils/constants';
-import { tryOnWithOpenAI, imageToBase64 } from '../../services/openai';
+import { tryOnWithHuggingFace } from '../../services/huggingface';
 
 export default function ResultsScreen() {
   const { bodyPhoto, clothingPhoto } = useLocalSearchParams<{
@@ -27,10 +27,7 @@ export default function ResultsScreen() {
     setError(null);
 
     try {
-      const personBase64 = await imageToBase64(bodyPhoto);
-      const garmentBase64 = await imageToBase64(clothingPhoto);
-
-      const result = await tryOnWithOpenAI(personBase64, garmentBase64);
+      const result = await tryOnWithHuggingFace(bodyPhoto, clothingPhoto);
 
       if (result.success && result.imageUrl) {
         setResultImage(result.imageUrl);
@@ -73,8 +70,8 @@ export default function ResultsScreen() {
       {loading ? (
         <View style={styles.loadingContainer}>
           <ActivityIndicator size="large" color={COLORS.accent} />
-          <Text style={styles.loadingText}>OpenAI обрабатывает фото...</Text>
-          <Text style={styles.loadingHint}>GPT-4o анализирует → DALL-E генерирует</Text>
+          <Text style={styles.loadingText}>Нейросеть обрабатывает фото...</Text>
+          <Text style={styles.loadingHint}>IDM-VTON модель • 10-30 сек</Text>
         </View>
       ) : error ? (
         <View style={styles.errorContainer}>
