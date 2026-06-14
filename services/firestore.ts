@@ -6,7 +6,6 @@ import {
   addDoc,
   query,
   where,
-  orderBy,
   Timestamp,
 } from 'firebase/firestore';
 import { db } from './firebase';
@@ -20,11 +19,10 @@ export async function getClothingItems(category?: string): Promise<ClothingItem[
   if (category) {
     q = query(
       collection(db, CLOTHING_COLLECTION),
-      where('category', '==', category),
-      orderBy('createdAt', 'desc')
+      where('category', '==', category)
     );
   } else {
-    q = query(collection(db, CLOTHING_COLLECTION), orderBy('createdAt', 'desc'));
+    q = query(collection(db, CLOTHING_COLLECTION));
   }
 
   const snapshot = await getDocs(q);
