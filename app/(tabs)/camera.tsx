@@ -56,7 +56,7 @@ export default function CameraScreen() {
         onCapture={handleCapture}
         onPickGallery={handlePickGallery}
         onToggleFlash={toggleFlash}
-        onBack={() => router.back()}
+        onBack={() => router.replace('/(tabs)/catalog')}
       />
     </View>
   );
