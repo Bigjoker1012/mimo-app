@@ -91,47 +91,49 @@ export default function HomeScreen() {
     <View style={styles.container}>
       <Text style={styles.title}>Virtual Try-On</Text>
 
-      {/* Блок 1: Модель */}
-      <View style={styles.section}>
-        <Text style={styles.sectionTitle}>1. Кто примеряет?</Text>
-        <View style={styles.photoBox}>
-          {bodyPhoto ? (
-            <Image source={{ uri: bodyPhoto }} style={styles.photo} />
-          ) : (
-            <Ionicons name="person-outline" size={48} color={COLORS.textSecondary} />
-          )}
+      <View style={styles.row}>
+        {/* Блок 1: Модель */}
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>1. Кто примеряет?</Text>
+          <View style={styles.photoBox}>
+            {bodyPhoto ? (
+              <Image source={{ uri: bodyPhoto }} style={styles.photo} />
+            ) : (
+              <Ionicons name="person-outline" size={36} color={COLORS.textSecondary} />
+            )}
+          </View>
+          <View style={styles.buttonRow}>
+            <TouchableOpacity style={styles.actionBtn} onPress={takeBodyPhoto}>
+              <Ionicons name="camera" size={16} color={COLORS.textPrimary} />
+              <Text style={styles.actionText}>Фото</Text>
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.actionBtn} onPress={pickBodyPhoto}>
+              <Ionicons name="images" size={16} color={COLORS.textPrimary} />
+              <Text style={styles.actionText}>Галерея</Text>
+            </TouchableOpacity>
+          </View>
         </View>
-        <View style={styles.buttonRow}>
-          <TouchableOpacity style={styles.actionBtn} onPress={takeBodyPhoto}>
-            <Ionicons name="camera" size={20} color={COLORS.textPrimary} />
-            <Text style={styles.actionText}>Камера</Text>
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.actionBtn} onPress={pickBodyPhoto}>
-            <Ionicons name="images" size={20} color={COLORS.textPrimary} />
-            <Text style={styles.actionText}>Галерея</Text>
-          </TouchableOpacity>
-        </View>
-      </View>
 
-      {/* Блок 2: Одежда */}
-      <View style={styles.section}>
-        <Text style={styles.sectionTitle}>2. Что примеряем?</Text>
-        <View style={styles.photoBox}>
-          {clothingPhoto ? (
-            <Image source={{ uri: clothingPhoto }} style={styles.photo} />
-          ) : (
-            <Ionicons name="shirt-outline" size={48} color={COLORS.textSecondary} />
-          )}
-        </View>
-        <View style={styles.buttonRow}>
-          <TouchableOpacity style={styles.actionBtn} onPress={takeClothingPhoto}>
-            <Ionicons name="camera" size={20} color={COLORS.textPrimary} />
-            <Text style={styles.actionText}>Камера</Text>
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.actionBtn} onPress={pickClothingPhoto}>
-            <Ionicons name="images" size={20} color={COLORS.textPrimary} />
-            <Text style={styles.actionText}>Галерея</Text>
-          </TouchableOpacity>
+        {/* Блок 2: Одежда */}
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>2. Что примеряем?</Text>
+          <View style={styles.photoBox}>
+            {clothingPhoto ? (
+              <Image source={{ uri: clothingPhoto }} style={styles.photo} />
+            ) : (
+              <Ionicons name="shirt-outline" size={36} color={COLORS.textSecondary} />
+            )}
+          </View>
+          <View style={styles.buttonRow}>
+            <TouchableOpacity style={styles.actionBtn} onPress={takeClothingPhoto}>
+              <Ionicons name="camera" size={16} color={COLORS.textPrimary} />
+              <Text style={styles.actionText}>Фото</Text>
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.actionBtn} onPress={pickClothingPhoto}>
+              <Ionicons name="images" size={16} color={COLORS.textPrimary} />
+              <Text style={styles.actionText}>Галерея</Text>
+            </TouchableOpacity>
+          </View>
         </View>
       </View>
 
@@ -160,18 +162,23 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     marginBottom: SPACING.md,
   },
+  row: {
+    flexDirection: 'row',
+    gap: SPACING.sm,
+    flex: 1,
+  },
   section: {
-    marginBottom: SPACING.sm,
+    flex: 1,
   },
   sectionTitle: {
     color: COLORS.textPrimary,
-    fontSize: 14,
+    fontSize: 13,
     fontWeight: '600',
     marginBottom: SPACING.xs,
   },
   photoBox: {
     width: '100%',
-    height: 120,
+    height: 180,
     backgroundColor: COLORS.surface,
     borderRadius: 12,
     justifyContent: 'center',
@@ -193,14 +200,14 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    gap: SPACING.xs,
+    gap: 4,
     backgroundColor: COLORS.surfaceLight,
     paddingVertical: SPACING.xs,
     borderRadius: 8,
   },
   actionText: {
     color: COLORS.textPrimary,
-    fontSize: 13,
+    fontSize: 12,
   },
   tryOnBtn: {
     backgroundColor: COLORS.accent,
