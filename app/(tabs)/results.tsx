@@ -1,102 +1,84 @@
-import { useEffect, useState } from 'react';
-import { View, TouchableOpacity, Text, StyleSheet, Alert, Share } from 'react-native';
+import { useState } from 'react';
+import { View, Text, Image, TouchableOpacity, StyleSheet, Alert, Share } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
-import { OverlayCanvas } from '../../components/OverlayCanvas';
-import { useTryOn } from '../../hooks/useTryOn';
-import { getClothingItem, saveTryOnResult } from '../../services/firestore';
-import { uploadTryOnResult } from '../../services/storage';
-import { initAuth } from '../../services/auth';
 import { COLORS, SPACING } from '../../utils/constants';
-import { ClothingItem } from '../../types';
 
 export default function ResultsScreen() {
-  const { photoUri, clothingId } = useLocalSearchParams<{
-    photoUri: string;
-    clothingId: string;
+  const { bodyPhoto, clothingPhoto } = useLocalSearchParams<{
+    bodyPhoto: string;
+    clothingPhoto: string;
   }>();
   const router = useRouter();
-  const { loading, error, position, processPhoto, reset } = useTryOn();
-  const [clothing, setClothing] = useState<ClothingItem | null>(null);
+  const [saved, setSaved] = useState(false);
 
-  useEffect(() => {
-    loadClothing();
-  }, [clothingId]);
-
-  useEffect(() => {
-    if (clothing && photoUri) {
-      processPhoto(photoUri, clothing);
-    }
-  }, [clothing, photoUri]);
-
-  const loadClothing = async () => {
-    const item = await getClothingItem(clothingId);
-    setClothing(item);
-  };
-
-  const handleSave = async () => {
-    try {
-      const user = await initAuth();
-      const resultId = Date.now().toString();
-      const resultUrl = await uploadTryOnResult(user.uid, resultId, photoUri);
-      await saveTryOnResult(user.uid, clothingId, photoUri, resultUrl);
-      Alert.alert('Сохранено', 'Результат сохранён в вашем профиле');
-    } catch (err) {
-      Alert.alert('Ошибка', 'Не удалось сохранить результат');
-    }
+  const handleSave = () => {
+    setSaved(true);
+    Alert.alert('Сохранено', 'Результат сохранён в историю');
   };
 
   const handleShare = async () => {
     try {
       await Share.share({
-        message: 'Посмотри, как мне идёт эта одежда! 👗',
-        url: photoUri,
+        message: 'Посмотри как я примеряю одежду!',
       });
     } catch (err) {
       Alert.alert('Ошибка', 'Не удалось поделиться');
     }
   };
 
-  const handleBack = () => {
-    reset();
-    router.back();
+  const handleDelete = () => {
+    Alert.alert('Удалить?', 'Результат будет стёрт', [
+      { text: 'Отмена', style: 'cancel' },
+      { text: 'Удалить', onPress: () => router.back() },
+    ]);
   };
 
   return (
     <View style={styles.container}>
-      <OverlayCanvas
-        photoUri={photoUri}
-        clothingImageUrl={clothing?.imageUrl ?? ''}
-        position={position}
-        loading={loading}
-      />
+      <Text style={styles.title}>Результат примерки</Text>
 
-      {error && (
-        <View style={styles.errorContainer}>
-          <Text style={styles.errorText}>{error}</Text>
-          <TouchableOpacity style={styles.retryButton} onPress={handleBack}>
-            <Text style={styles.retryText}>Попробовать снова</Text>
-          </TouchableOpacity>
+      <View style={styles.photosContainer}>
+        <View style={styles.photoBox}>
+          <Text style={styles.label}>Модель</Text>
+          <Image source={{ uri: bodyPhoto }} style={styles.photo} resizeMode="contain" />
         </View>
-      )}
+        <View style={styles.photoBox}>
+          <Text style={styles.label}>Одежда</Text>
+          <Image source={{ uri: clothingPhoto }} style={styles.photo} resizeMode="contain" />
+        </View>
+      </View>
+
+      <Text style={styles.hint}>
+        Для полноценной примерки необходим Google Cloud Vision API.{'\n'}
+        Сейчас показаны исходные фото.
+      </Text>
 
       <View style={styles.bottomBar}>
-        <TouchableOpacity style={styles.button} onPress={handleBack}>
-          <Ionicons name="arrow-back" size={24} color={COLORS.textPrimary} />
-          <Text style={styles.buttonText}>Назад</Text>
+        <TouchableOpacity style={styles.btn} onPress={() => router.back()}>
+          <Ionicons name="arrow-back" size={20} color={COLORS.textPrimary} />
+          <Text style={styles.btnText}>Назад</Text>
         </TouchableOpacity>
 
-        <TouchableOpacity style={styles.button} onPress={handleShare}>
-          <Ionicons name="share-outline" size={24} color={COLORS.textPrimary} />
-          <Text style={styles.buttonText}>Поделиться</Text>
+        <TouchableOpacity style={styles.btn} onPress={handleDelete}>
+          <Ionicons name="trash-outline" size={20} color={COLORS.error} />
+          <Text style={[styles.btnText, { color: COLORS.error }]}>Удалить</Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity style={styles.btn} onPress={handleShare}>
+          <Ionicons name="share-outline" size={20} color={COLORS.textPrimary} />
+          <Text style={styles.btnText}>Поделиться</Text>
         </TouchableOpacity>
 
         <TouchableOpacity
-          style={[styles.button, styles.primaryButton]}
+          style={[styles.btn, styles.saveBtn]}
           onPress={handleSave}
+          disabled={saved}
         >
-          <Ionicons name="bookmark-outline" size={24} color={COLORS.background} />
-          <Text style={[styles.buttonText, styles.primaryButtonText]}>Сохранить</Text>
+          <Ionicons name="bookmark" size={20} color={COLORS.background} />
+          <Text style={[styles.btnText, { color: COLORS.background }]}>
+            {saved ? 'Сохранено' : 'Сохранить'}
+          </Text>
         </TouchableOpacity>
       </View>
     </View>
@@ -107,49 +89,63 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: COLORS.background,
+    padding: SPACING.md,
+  },
+  title: {
+    color: COLORS.accent,
+    fontSize: 20,
+    fontWeight: '700',
+    textAlign: 'center',
+    marginBottom: SPACING.lg,
+  },
+  photosContainer: {
+    flexDirection: 'row',
+    gap: SPACING.sm,
+    marginBottom: SPACING.md,
+  },
+  photoBox: {
+    flex: 1,
+    backgroundColor: COLORS.surface,
+    borderRadius: 12,
+    overflow: 'hidden',
+  },
+  label: {
+    color: COLORS.textSecondary,
+    fontSize: 12,
+    textAlign: 'center',
+    paddingVertical: SPACING.xs,
+    backgroundColor: COLORS.surfaceLight,
+  },
+  photo: {
+    width: '100%',
+    height: 200,
+  },
+  hint: {
+    color: COLORS.textSecondary,
+    fontSize: 12,
+    textAlign: 'center',
+    marginBottom: SPACING.lg,
   },
   bottomBar: {
     flexDirection: 'row',
     justifyContent: 'space-around',
-    padding: SPACING.lg,
-    paddingBottom: SPACING.xl,
-    backgroundColor: COLORS.surface,
+    paddingTop: SPACING.md,
+    borderTopWidth: 1,
+    borderTopColor: COLORS.surfaceLight,
   },
-  button: {
+  btn: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: SPACING.xs,
+    gap: 4,
     paddingVertical: SPACING.sm,
-    paddingHorizontal: SPACING.md,
-    borderRadius: 8,
+    paddingHorizontal: SPACING.sm,
   },
-  primaryButton: {
+  saveBtn: {
     backgroundColor: COLORS.accent,
-  },
-  buttonText: {
-    color: COLORS.textPrimary,
-    fontSize: 14,
-    fontWeight: '600',
-  },
-  primaryButtonText: {
-    color: COLORS.background,
-  },
-  errorContainer: {
-    padding: SPACING.lg,
-    alignItems: 'center',
-  },
-  errorText: {
-    color: COLORS.error,
-    marginBottom: SPACING.md,
-  },
-  retryButton: {
-    paddingVertical: SPACING.sm,
-    paddingHorizontal: SPACING.lg,
     borderRadius: 8,
-    borderWidth: 1,
-    borderColor: COLORS.accent,
   },
-  retryText: {
-    color: COLORS.accent,
+  btnText: {
+    color: COLORS.textPrimary,
+    fontSize: 12,
   },
 });

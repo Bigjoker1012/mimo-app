@@ -1,42 +1,19 @@
-import { View, FlatList, StyleSheet, ActivityIndicator, Text } from 'react-native';
-import { useLocalSearchParams, useRouter } from 'expo-router';
-import { CategoryTabs } from '../../components/CategoryTabs';
-import { ClothingCard } from '../../components/ClothingCard';
-import { useClothing } from '../../hooks/useClothing';
+import { View, Text, StyleSheet } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
 import { COLORS, SPACING } from '../../utils/constants';
-import { ClothingItem } from '../../types';
 
 export default function CatalogScreen() {
-  const { photoUri } = useLocalSearchParams<{ photoUri: string }>();
-  const router = useRouter();
-  const { items, loading, error, selectedCategory, selectCategory } = useClothing();
-
-  const handleTryOn = (item: ClothingItem) => {
-    router.push({
-      pathname: '/results',
-      params: { photoUri, clothingId: item.id },
-    });
-  };
-
   return (
     <View style={styles.container}>
-      <CategoryTabs selected={selectedCategory} onSelect={selectCategory} />
+      <Text style={styles.title}>История примерок</Text>
 
-      {loading ? (
-        <ActivityIndicator size="large" color={COLORS.accent} style={styles.loader} />
-      ) : error ? (
-        <Text style={styles.error}>{error}</Text>
-      ) : (
-        <FlatList
-          data={items}
-          keyExtractor={(item) => item.id}
-          numColumns={2}
-          contentContainerStyle={styles.list}
-          renderItem={({ item }) => (
-            <ClothingCard item={item} onTryOn={handleTryOn} />
-          )}
-        />
-      )}
+      <View style={styles.emptyState}>
+        <Ionicons name="images-outline" size={64} color={COLORS.textSecondary} />
+        <Text style={styles.emptyText}>Пока нет сохранённых примерок</Text>
+        <Text style={styles.emptyHint}>
+          Сделайте примерку и нажмите "Сохранить"
+        </Text>
+      </View>
     </View>
   );
 }
@@ -45,18 +22,29 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: COLORS.background,
-    paddingTop: SPACING.xl,
+    padding: SPACING.lg,
   },
-  list: {
-    padding: SPACING.sm,
+  title: {
+    color: COLORS.accent,
+    fontSize: 20,
+    fontWeight: '700',
+    textAlign: 'center',
+    marginBottom: SPACING.xl,
   },
-  loader: {
+  emptyState: {
     flex: 1,
     justifyContent: 'center',
+    alignItems: 'center',
+    gap: SPACING.md,
   },
-  error: {
-    color: COLORS.error,
+  emptyText: {
+    color: COLORS.textPrimary,
+    fontSize: 16,
+    fontWeight: '500',
+  },
+  emptyHint: {
+    color: COLORS.textSecondary,
+    fontSize: 14,
     textAlign: 'center',
-    marginTop: SPACING.xl,
   },
 });
