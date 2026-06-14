@@ -36,16 +36,24 @@ export async function getClothingItems(category?: string): Promise<ClothingItem[
 }
 
 export async function getClothingItem(id: string): Promise<ClothingItem | null> {
-  const docRef = doc(db, CLOTHING_COLLECTION, id);
-  const docSnap = await getDoc(docRef);
+  try {
+    const docRef = doc(db, CLOTHING_COLLECTION, id);
+    const docSnap = await getDoc(docRef);
 
-  if (!docSnap.exists()) return null;
+    if (!docSnap.exists()) return null;
 
-  return {
-    id: docSnap.id,
-    ...docSnap.data(),
-    createdAt: docSnap.data().createdAt?.toDate(),
-  } as ClothingItem;
+    const data = docSnap.data();
+    if (!data) return null;
+
+    return {
+      id: docSnap.id,
+      ...data,
+      createdAt: data.createdAt?.toDate?.() ?? new Date(),
+    } as ClothingItem;
+  } catch (error) {
+    console.error('Error getting clothing item:', error);
+    return null;
+  }
 }
 
 export async function saveTryOnResult(
