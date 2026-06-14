@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, Image, Alert } from 'react-native';
 import { useRouter } from 'expo-router';
 import * as ImagePicker from 'expo-image-picker';
@@ -95,13 +95,16 @@ export default function HomeScreen() {
         {/* Блок 1: Модель */}
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>1. Кто примеряет?</Text>
-          <View style={styles.photoBox}>
+          <TouchableOpacity style={styles.photoBox} onPress={pickBodyPhoto}>
             {bodyPhoto ? (
               <Image source={{ uri: bodyPhoto }} style={styles.photo} />
             ) : (
-              <Ionicons name="person-outline" size={36} color={COLORS.textSecondary} />
+              <View style={styles.placeholder}>
+                <Ionicons name="person-outline" size={40} color={COLORS.textSecondary} />
+                <Text style={styles.placeholderText}>Нажмите или перетащите фото</Text>
+              </View>
             )}
-          </View>
+          </TouchableOpacity>
           <View style={styles.buttonRow}>
             <TouchableOpacity style={styles.actionBtn} onPress={takeBodyPhoto}>
               <Ionicons name="camera" size={16} color={COLORS.textPrimary} />
@@ -117,13 +120,16 @@ export default function HomeScreen() {
         {/* Блок 2: Одежда */}
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>2. Что примеряем?</Text>
-          <View style={styles.photoBox}>
+          <TouchableOpacity style={styles.photoBox} onPress={pickClothingPhoto}>
             {clothingPhoto ? (
               <Image source={{ uri: clothingPhoto }} style={styles.photo} />
             ) : (
-              <Ionicons name="shirt-outline" size={36} color={COLORS.textSecondary} />
+              <View style={styles.placeholder}>
+                <Ionicons name="shirt-outline" size={40} color={COLORS.textSecondary} />
+                <Text style={styles.placeholderText}>Нажмите или перетащите фото</Text>
+              </View>
             )}
-          </View>
+          </TouchableOpacity>
           <View style={styles.buttonRow}>
             <TouchableOpacity style={styles.actionBtn} onPress={takeClothingPhoto}>
               <Ionicons name="camera" size={16} color={COLORS.textPrimary} />
@@ -178,18 +184,30 @@ const styles = StyleSheet.create({
   },
   photoBox: {
     width: '100%',
-    height: 180,
+    aspectRatio: 1,
     backgroundColor: COLORS.surface,
     borderRadius: 12,
     justifyContent: 'center',
     alignItems: 'center',
     marginBottom: SPACING.xs,
     overflow: 'hidden',
+    borderWidth: 2,
+    borderColor: COLORS.surfaceLight,
+    borderStyle: 'dashed',
   },
   photo: {
     width: '100%',
     height: '100%',
     resizeMode: 'cover',
+  },
+  placeholder: {
+    alignItems: 'center',
+    gap: SPACING.xs,
+  },
+  placeholderText: {
+    color: COLORS.textSecondary,
+    fontSize: 11,
+    textAlign: 'center',
   },
   buttonRow: {
     flexDirection: 'row',
