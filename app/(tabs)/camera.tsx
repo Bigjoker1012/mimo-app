@@ -143,7 +143,7 @@ export default function HomeScreen() {
         onPress={handleTryOn}
         disabled={!bodyPhoto || !clothingPhoto}
       >
-        <Text style={styles.tryOnText}>Примерить</Text>
+        <Text style={styles.tryOnText}>Создать образ</Text>
       </TouchableOpacity>
     </View>
   );
