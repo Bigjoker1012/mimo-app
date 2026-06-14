@@ -32,4 +32,8 @@ export const CATEGORIES = [
   { id: 'tshirt', label: 'Футболки' },
   { id: 'shirt', label: 'Рубашки' },
   { id: 'jacket', label: 'Куртки' },
+  { id: 'pants', label: 'Брюки' },
+  { id: 'dress', label: 'Платья' },
+  { id: 'skirt', label: 'Юбки' },
+  { id: 'suit', label: 'Костюмы' },
 ] as const;

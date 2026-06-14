@@ -7,7 +7,7 @@ export interface User {
 export interface ClothingItem {
   id: string;
   name: string;
-  category: 'tshirt' | 'shirt' | 'jacket';
+  category: 'tshirt' | 'shirt' | 'jacket' | 'pants' | 'dress' | 'skirt' | 'suit';
   imageUrl: string;
   overlayConfig: OverlayConfig;
   createdAt: Date;

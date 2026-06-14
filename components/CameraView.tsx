@@ -1,10 +1,10 @@
 import { View, TouchableOpacity, StyleSheet, Text } from 'react-native';
-import { Camera } from 'expo-camera';
+import { CameraView as ExpoCameraView, type CameraViewRef } from 'expo-camera';
 import { Ionicons } from '@expo/vector-icons';
 import { COLORS, SPACING } from '../utils/constants';
 
 interface CameraViewProps {
-  cameraRef: React.RefObject<Camera>;
+  cameraRef: React.RefObject<CameraViewRef>;
   flashMode: 'on' | 'off';
   onCapture: () => void;
   onPickGallery: () => void;
@@ -22,11 +22,11 @@ export function CameraView({
 }: CameraViewProps) {
   return (
     <View style={styles.container}>
-      <Camera
+      <ExpoCameraView
         ref={cameraRef}
         style={styles.camera}
-        flashMode={flashMode}
-        type={Camera.Constants.Type.back}
+        flash={flashMode}
+        facing="back"
       >
         <View style={styles.overlay}>
           <View style={styles.topBar}>
@@ -54,7 +54,7 @@ export function CameraView({
             </TouchableOpacity>
           </View>
         </View>
-      </Camera>
+      </ExpoCameraView>
     </View>
   );
 }

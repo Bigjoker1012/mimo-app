@@ -1,16 +1,16 @@
 import { useState, useRef } from 'react';
-import { Camera } from 'expo-camera';
+import { CameraView, type CameraViewRef } from 'expo-camera';
 import * as ImagePicker from 'expo-image-picker';
 import { Alert } from 'react-native';
 
 export function useCamera() {
   const [hasPermission, setHasPermission] = useState<boolean | null>(null);
   const [photo, setPhoto] = useState<string | null>(null);
-  const [flashMode, setFlashMode] = useState<Camera.FlashMode>('off');
-  const cameraRef = useRef<Camera>(null);
+  const [flashMode, setFlashMode] = useState<'on' | 'off'>('off');
+  const cameraRef = useRef<CameraViewRef>(null);
 
   const requestPermission = async () => {
-    const { status } = await Camera.requestCameraPermissionsAsync();
+    const { status } = await CameraView.requestCameraPermissionsAsync();
     setHasPermission(status === 'granted');
 
     if (status !== 'granted') {
@@ -19,7 +19,7 @@ export function useCamera() {
         'Для работы приложения нужен доступ к камере. Перейдите в настройки.',
         [
           { text: 'Отмена', style: 'cancel' },
-          { text: 'Настройки', onPress: () => Camera.requestCameraPermissionsAsync() },
+          { text: 'Настройки', onPress: () => CameraView.requestCameraPermissionsAsync() },
         ]
       );
     }
@@ -33,7 +33,6 @@ export function useCamera() {
     try {
       const result = await cameraRef.current.takePictureAsync({
         quality: 0.8,
-        base64: false,
       });
 
       setPhoto(result.uri);
@@ -52,7 +51,7 @@ export function useCamera() {
     }
 
     const result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      mediaTypes: ['images'],
       allowsEditing: true,
       quality: 0.8,
     });
