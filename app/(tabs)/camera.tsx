@@ -151,32 +151,32 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: COLORS.background,
-    padding: SPACING.lg,
+    padding: SPACING.md,
   },
   title: {
     color: COLORS.accent,
-    fontSize: 24,
+    fontSize: 20,
     fontWeight: '700',
     textAlign: 'center',
-    marginBottom: SPACING.xl,
+    marginBottom: SPACING.md,
   },
   section: {
-    marginBottom: SPACING.lg,
+    marginBottom: SPACING.sm,
   },
   sectionTitle: {
     color: COLORS.textPrimary,
-    fontSize: 16,
+    fontSize: 14,
     fontWeight: '600',
-    marginBottom: SPACING.sm,
+    marginBottom: SPACING.xs,
   },
   photoBox: {
     width: '100%',
-    height: 150,
+    height: 120,
     backgroundColor: COLORS.surface,
     borderRadius: 12,
     justifyContent: 'center',
     alignItems: 'center',
-    marginBottom: SPACING.sm,
+    marginBottom: SPACING.xs,
     overflow: 'hidden',
   },
   photo: {
@@ -186,7 +186,7 @@ const styles = StyleSheet.create({
   },
   buttonRow: {
     flexDirection: 'row',
-    gap: SPACING.sm,
+    gap: SPACING.xs,
   },
   actionBtn: {
     flex: 1,
@@ -195,26 +195,26 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     gap: SPACING.xs,
     backgroundColor: COLORS.surfaceLight,
-    paddingVertical: SPACING.sm,
+    paddingVertical: SPACING.xs,
     borderRadius: 8,
   },
   actionText: {
     color: COLORS.textPrimary,
-    fontSize: 14,
+    fontSize: 13,
   },
   tryOnBtn: {
     backgroundColor: COLORS.accent,
-    paddingVertical: SPACING.md,
+    paddingVertical: SPACING.sm,
     borderRadius: 12,
     alignItems: 'center',
-    marginTop: SPACING.lg,
+    marginTop: SPACING.md,
   },
   tryOnBtnDisabled: {
     opacity: 0.5,
   },
   tryOnText: {
     color: COLORS.background,
-    fontSize: 18,
+    fontSize: 16,
     fontWeight: '700',
   },
 });
