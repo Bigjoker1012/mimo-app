@@ -35,9 +35,24 @@ async function queryModelWithImages(
     body: formData,
   });
 
+  const contentType = response.headers.get('content-type') || '';
+
   if (!response.ok) {
-    const err = await response.text();
-    throw new Error(`HuggingFace error: ${err}`);
+    const errText = await response.text();
+    let errMsg = errText;
+    try {
+      const errJson = JSON.parse(errText);
+      errMsg = errJson.error || errJson.message || errText;
+    } catch {}
+    throw new Error(`HuggingFace (${response.status}): ${errMsg}`);
+  }
+
+  if (contentType.includes('application/json')) {
+    const json = await response.json();
+    if (json.error) {
+      throw new Error(`HuggingFace: ${json.error}`);
+    }
+    throw new Error('HuggingFace: unexpected JSON response');
   }
 
   return response.blob();
