@@ -1,8 +1,5 @@
 const HF_API_URL = 'https://api-inference.huggingface.co/models';
-const CORS_PROXY = 'https://corsproxy.io/?';
 const API_TOKEN = process.env.EXPO_PUBLIC_HUGGINGFACE_API_TOKEN;
-
-const VITON_MODEL = 'yisol/IDM-VTON';
 
 interface TryOnResult {
   success: boolean;
@@ -10,70 +7,65 @@ interface TryOnResult {
   error?: string;
 }
 
-async function imageToBase64(uri: string): Promise<string> {
+async function imageToBlob(uri: string): Promise<Blob> {
   const response = await fetch(uri);
-  const blob = await response.blob();
+  return response.blob();
+}
 
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.onloadend = () => {
-      const base64 = (reader.result as string).split(',')[1];
-      resolve(base64);
-    };
-    reader.onerror = reject;
-    reader.readAsDataURL(blob);
+async function tryModel(model: string, personUri: string, garmentUri: string): Promise<string> {
+  const formData = new FormData();
+  const personBlob = await imageToBlob(personUri);
+  const garmentBlob = await imageToBlob(garmentUri);
+  formData.append('person_image', personBlob, 'person.jpg');
+  formData.append('garment_image', garmentBlob, 'garment.jpg');
+
+  const response = await fetch(`${HF_API_URL}/${model}`, {
+    method: 'POST',
+    headers: {
+      'Authorization': `Bearer ${API_TOKEN}`,
+    },
+    body: formData,
   });
+
+  if (!response.ok) {
+    const errText = await response.text();
+    let errMsg = errText;
+    try {
+      const errJson = JSON.parse(errText);
+      errMsg = errJson.error || errJson.estimated_time ? `Модель загружается (~${Math.round(errJson.estimated_time)}с)` : errText;
+    } catch {}
+    throw new Error(errMsg);
+  }
+
+  const contentType = response.headers.get('content-type') || '';
+  if (contentType.includes('application/json')) {
+    const json = await response.json();
+    if (json.error) throw new Error(json.error);
+    throw new Error('unexpected JSON');
+  }
+
+  const blob = await response.blob();
+  return URL.createObjectURL(blob);
 }
 
 export async function tryOnWithHuggingFace(
   personImageUri: string,
   garmentImageUri: string
 ): Promise<TryOnResult> {
-  try {
-    const personBase64 = await imageToBase64(personImageUri);
-    const garmentBase64 = await imageToBase64(garmentImageUri);
+  const models = [
+    'yisol/IDM-VTON',
+    'Kwai-Kolors/Kolors-Virtual-Try-On',
+  ];
 
-    const personBlob = await (await fetch(personImageUri)).blob();
-    const garmentBlob = await (await fetch(garmentImageUri)).blob();
-
-    const formData = new FormData();
-    formData.append('person_image', personBlob, 'person.jpg');
-    formData.append('garment_image', garmentBlob, 'garment.jpg');
-
-    const url = `${CORS_PROXY}${encodeURIComponent(`${HF_API_URL}/${VITON_MODEL}`)}`;
-
-    const response = await fetch(url, {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${API_TOKEN}`,
-      },
-      body: formData,
-    });
-
-    const contentType = response.headers.get('content-type') || '';
-
-    if (!response.ok) {
-      const errText = await response.text();
-      let errMsg = errText;
-      try {
-        const errJson = JSON.parse(errText);
-        errMsg = errJson.error || errJson.message || errText;
-      } catch {}
-      throw new Error(`HuggingFace (${response.status}): ${errMsg}`);
+  for (const model of models) {
+    try {
+      const imageUrl = await tryModel(model, personImageUri, garmentImageUri);
+      return { success: true, imageUrl };
+    } catch (error: any) {
+      console.log(`Model ${model} failed:`, error.message);
+      continue;
     }
-
-    if (contentType.includes('application/json')) {
-      const json = await response.json();
-      if (json.error) {
-        throw new Error(`HuggingFace: ${json.error}`);
-      }
-      throw new Error('HuggingFace: unexpected JSON response');
-    }
-
-    const resultBlob = await response.blob();
-    const imageUrl = URL.createObjectURL(resultBlob);
-    return { success: true, imageUrl };
-  } catch (error: any) {
-    return { success: false, error: error.message };
   }
+
+  return { success: false, error: 'Все модели временно недоступны. Попробуйте позже.' };
 }
